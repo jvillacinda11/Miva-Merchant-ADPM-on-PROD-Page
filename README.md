@@ -2,14 +2,14 @@
 
 ## Table of Contents
 - [Description](#description)
-- [Purpose and Goals] (#Purpose and Goals)
+- [Goals] (#Purpose and Goals)
 
 
 ## Description
 
 This is a walk through on how to implement add-on products onto main product pages (PROD Page) in Miva Merchant eccomerce stores that use shadows readytheme. This works in tandem with the attribute machine and retains an "out-of-box" feel of shadows readytheme.
 
-## Purpose and Goals
+## Goals
 
 - Create an easier, more efficient and enjoyable user experience. 
 The main goal of this project is to allow customers to add recommended or related products to their basket alongside a main product all in a single form submit. This makes the user shopping experience quicker, more efficient and more enjoyable. More items added to cart lead to increase sales average.
