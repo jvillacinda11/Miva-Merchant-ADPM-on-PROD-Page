@@ -14,9 +14,9 @@
 
 ## Description
 
-    This is a walk through on how to implement add-on products onto main product pages (PROD Page) in Miva Merchant eccomerce stores that use shadows readytheme. This works in tandem with the attribute machine and retains an "out-of-box" feel of shadows readytheme. 
+This is a walk through on how to implement add-on products onto main product pages (PROD Page) in Miva Merchant eccomerce stores that use shadows readytheme. This works in tandem with the attribute machine and retains an "out-of-box" feel of shadows readytheme. 
 
-    [Live Example](https://www.weistec.com/m157_ecu_tune.html)
+[Live Example](https://www.weistec.com/m157_ecu_tune.html)
 
 
 ## Goals
