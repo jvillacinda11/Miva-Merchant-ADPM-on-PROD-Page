@@ -5,7 +5,7 @@
 - [Goals](#goals)
 - [Limitations](#limitations)
 - [Implementation](#implementation)
-    - [Step 1 -- Setting Up The Required Custom Fields](#step-1----setting-up-the-required-custom-fields)
+    - [Step 1 -- Setting Up The Required Custom Fields](#step-1----setting-up-the-custom-fields-and-custom-groups)
     - [Step 2 -- Add-on Product Template](#step-2----add-on-product-template)
     - [Step 3 -- ADPR vs ADPM - Working Around The Attribute Machine](#step-3----adpr-vs-adpm---working-around-the-attribute-machine)
     - [Step 4 -- Handling Price changes](#step-4----handling-price-changes)
@@ -46,9 +46,41 @@ Discounts don't display on product page, but once added to cart discounts are ap
 
 ADPM does support attributes for multiple products so it is possible to implement it, but we thought that doing so would take up too much space on screen. Because of this we chose not to do so. 
 
-## IMPLEMENTATION
+## Implementation
 
-### Step 1 -- Setting up the required custom fields
+### Step 1 -- Setting Up The Custom Fields And Custom Groups
+
+Custom fields are a powerful tool to customize your eccomerce store. For more info read Miva's Documentation on [Custom Fields](https://docs.miva.com/template-language/custom-field-reference-documentation).
+
+For this project we use three custom fields: add_on_product, add_on_product_image, add_on_product_short_name. For better Admin work flow we will seperate these custom fields into the custom field groups: Add-ons (Parent), Add-ons (Child)  If you don't want your add-on products to have images, only use add_on_product.
+
+You can create a new custom field group in Home > Utility Settings > Custom Field Groups.
+
+![](./Assets/Customfield-Group-Add-Group-Button.png)
+
+This is the set up
+
+![](./Assets/CustomField-Group-Set-up.png)
+
+You can create a new custom field in Home > Utility Settings > Custom Fields.
+
+- **add_on_product**
+    
+    This field is for main products and is part of the "Add-on (Parents)" custom field group. This custom field will hold a string of product codes of products that you would like to be add-on products. Each product code should be separated by a comma. The following is the set up.
+
+![](./Assets/add_on_product-set-up.png)
+
+- **add_on_product_image**
+
+    This custom field is to be used on the add-on product itself and is part of the "Add-ons (Child). This field holds an image of the add-on product. In this project, the add-on image is 480 x 480 pixels and has a lower resolution for optimal performance. The following is  the set up.
+
+    ![](./Assets/add_on_product_image-set-up.png)
+
+- **add_on_product_short_name**
+
+    This custom field is to be used on the add-on product itself. This is to customize how you want the add-on product name to appear. It is completely optioonal, but useful if your add-on product has a long name that would take up too much space on the screen.
+
+    ![](./Assets/add_on_product_short_name-set-up.png)
 
 
 ### Step 2 -- Add-on Product template
@@ -56,7 +88,7 @@ ADPM does support attributes for multiple products so it is possible to implemen
 
 ### Step 3 -- ADPR vs ADPM - Working Around The Attribute Machine
 
-**A little background info**
+**A little background info on MIVA Actions and Forms**
 
 Miva Merchant uses hidden inputs named actions that let their engine know how to handle forms and each form has its own required inputs and format. For example, Login form uses the action LOGN and requires email and password. A full list of actions can be found [here](https://gist.github.com/steveosoule/29028906236ee5dbc561ac7ac858fc56). Here we are going to focus on the action ADPR and ADPM and their required inputs and form formats. 
 
