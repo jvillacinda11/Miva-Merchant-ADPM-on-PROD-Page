@@ -57,11 +57,11 @@ For this project we use three custom fields: add_on_product, add_on_product_imag
 
 You can create a new custom field group in Home > Utility Settings > Custom Field Groups.
 
-    ![](./Assets/Customfield-Group-Add-Group-Button.png)
+![](./Assets/Customfield-Group-Add-Group-Button.png)
 
 This is the set up
 
-    ![](./Assets/CustomField-Group-Set-up.png)
+![](./Assets/CustomField-Group-Set-up.png)
 
 You can create a new custom field in Home > Utility Settings > Custom Fields.
 
@@ -69,13 +69,13 @@ You can create a new custom field in Home > Utility Settings > Custom Fields.
     
     This field is for main products and is part of the "Add-on (Parents)" custom field group. This custom field will hold a string of product codes of products that you would like to be add-on products. Each product code should be separated by a comma. The following is the set up.
 
-![](./Assets/add_on_product-set-up.png)
+    ![](./Assets/add_on_product-set-up.png)
 
 - **add_on_product_image**
 
     This custom field is to be used on the add-on product itself and is part of the "Add-ons (Child). This field holds an image of the add-on product. In this project, the add-on image is 480 x 480 pixels and has a lower resolution for optimal performance. The size can  The following is  the set up.
 
-![](./Assets/add_on_product_image-set-up.png)
+    ![](./Assets/add_on_product_image-set-up.png)
 
 - **add_on_product_short_name**
 
