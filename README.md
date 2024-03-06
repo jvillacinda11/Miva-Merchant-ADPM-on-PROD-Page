@@ -328,6 +328,7 @@ The Attribute Machine outputs current price of product based on discounts and at
 ```
 
 **Price Change due to Add-on Products**
+
 This can be added as a javascript resource. This only triggers when a add-on product is checked or unchecked.
 
 ```js
