@@ -2,19 +2,27 @@
 
 ## Table of Contents
 - [Description](#description)
+    - [Demo](#demo)
 - [Goals](#goals)
 - [Limitations](#limitations)
 - [Implementation](#implementation)
     - [Step 1 -- Setting Up The Required Custom Fields](#step-1----setting-up-the-custom-fields-and-custom-groups)
     - [Step 2 -- Add-on Product Template](#step-2----add-on-product-template)
     - [Step 3 -- ADPR vs ADPM - Working Around The Attribute Machine](#step-3----adpr-vs-adpm---working-around-the-attribute-machine)
-    - [Step 4 -- Handling Price changes](#step-4----handling-price-changes)
+    - [Step 4 -- Handling Price Changes](#step-4----handling-price-changes)
     - [Step 5 -- AJAX request](#step-5----ajax-request)
     - [Step 6 -- Error Handling](#step-6----error-handling)
+- [Admin Workflow](#admin-workflow)
+    - [Setting Up and Add-on Product](#setting-up-an-add-on-product)
+    - [Setting Up the Main Product](#setting-up-the-main-product)
 
 ## Description
 
 This is a walk through on how to implement add-on products onto main product pages (PROD Page) in Miva Merchant eccomerce stores that use shadows readytheme. This works in tandem with the attribute machine and retains an "out-of-box" feel of shadows readytheme. This is an project is very involved and should only be done by a developer. 
+
+### Demo
+
+![](./Assets/Demo.mp4)
 
 [Live Example](https://www.weistec.com/m157_ecu_tune.html). 
 **NOTE:** This version may have additional functionality and styling that is not covered here. 
