@@ -14,10 +14,10 @@
 
 ## Description
 
-This is a walk through on how to implement add-on products onto main product pages (PROD Page) in Miva Merchant eccomerce stores that use shadows readytheme. This works in tandem with the attribute machine and retains an "out-of-box" feel of shadows readytheme. 
+This is a walk through on how to implement add-on products onto main product pages (PROD Page) in Miva Merchant eccomerce stores that use shadows readytheme. This works in tandem with the attribute machine and retains an "out-of-box" feel of shadows readytheme. This is an project is pretty involved and should only be done by a developer. 
 
 [Live Example](https://www.weistec.com/m157_ecu_tune.html). 
-NOTE: This version may have additional functionality and styling that is not covered here. 
+**NOTE:** This version may have additional functionality and styling that is not covered here. 
 
 
 ## Goals
@@ -203,7 +203,7 @@ Miva Merchant uses hidden inputs named actions that let their engine know how to
 
 ```
 
-By default the PROD page (Product Display page) uses a form that uses the action ADPR (Add Product) to add products to cart. The Attribute Machine recognizes the form format and all the expected functionality runs normally, but if we want to be able to add multiple products we will have to use the action ADPM (Add Product Multiple) and its form which the attribute machine doesn't recognize. The solution here is to load in the form in ADPR format and convert it ADPM format when the user submits the form by clicking the add to cart button. [rguisewite](https://www.miva.com/forums/forum/online-merchants/miva-merchant-9/692445-error-unable-to-locate-form-for-inventory-attributes-when-setting-up-multiadd?p=692534#post692534) made the original script that made this possible. I slightly changed it to fit our needs but it is the same script.
+By default the PROD page (Product Display page) uses a form that uses the action ADPR (Add Product) to add products to cart. The Attribute Machine recognizes the form format and all the expected functionality runs normally, but if we want to be able to add multiple products we will have to use the action ADPM (Add Product Multiple) and its form which the attribute machine doesn't recognize. The solution here is to load in the form in ADPR format and convert it ADPM format when the user submits the form by clicking the add to cart button. This script is a modified version of the javascript that handles quantities from the MIVA code sample from before.  [rguisewite](https://www.miva.com/forums/forum/online-merchants/miva-merchant-9/692445-error-unable-to-locate-form-for-inventory-attributes-when-setting-up-multiadd?p=692534#post692534) made the original modified script that made this possible. I slightly changed it to fit our needs but it is the same script.
 
 **NOTE:** For this script to work you must you must give your add-to-cart form the id "AddToCartForm" and the Quantity input the id "Quantity"
 
@@ -274,13 +274,206 @@ function write_quantity_inputs()
 
 ### Step 4 -- Handling Price changes
 
+At this stage, products will only update price for change in attributes, but the price of add-on products will not be added to the total displayed on the product page. We will have to modify the page template and use two scripts. One that handles price changes when triggered by attribute change and another that is triggered when an add-on product checkbox is checked. 
 
 ### Step 5 -- AJAX request
 
+In some miva themes, adding items to cart opens a minibasket that displays everything that has been added so far. This is done via an AJAX request in a script named "add-to-cart.js". Like before with the Attribute Machine, the default "add-to-cart-ajax.js" will only work with form associated with the action ADPR. We have to modify it in order to be able to handle the form associated with the action ADPM. If you don't already have this script you can create one and use theme.js to call it. Here is the modified script.  
+
+```js
+/**
+ * When called from a `theme.js` file on a product page, this extension will
+ * work with the default page code to add a product to the cart utilizing an
+ * AJAX call to the form processor.
+ *
+ * The function contains internal error checking as well as a check to see which
+ * page was reached and displaying messages accordingly. If the store is also
+ * utilizing the `mini-basket` extension, said extension will be triggered for
+ * display upon successfully adding a product to the cart.
+ * 
+ * CUSTOM -- This code has been modified to be able to handle multi-product add to cart
+ */
+(function (window, document, undefined) {
+	'use strict';
+
+	var purchaseButton = document.querySelector('[data-hook="add-to-cart"]');
+	var purchaseButtonText = (purchaseButton.nodeName.toLowerCase() === 'input') ? purchaseButton.value : purchaseButton.textContent;
+	var purchaseForm = document.querySelector('[data-hook="purchase"]');
+	var purchaseFormActionInput = purchaseForm.querySelector('input[name="Action"]');
+	var responseMessage = document.querySelector('[data-hook="purchase-message"]');
+	var miniBasketCount = document.querySelectorAll('[data-hook~="mini-basket-count"]');
+	var miniBasketAmount = document.querySelectorAll('[data-hook~="mini-basket-amount"]');
+	var	element_quantity = document.getElementById('add_on_quantity'); // CUSTOM -- should this elemtent should only be present for add-on products
+
+
+	purchaseForm.addEventListener('submit', function (evt) {
+		if (purchaseFormActionInput.value === 'ADPR' || purchaseFormActionInput.value === 'ADPM') {
+
+			evt.preventDefault();
+			evt.stopImmediatePropagation();
+	
+			purchaseForm.action = purchaseButton.getAttribute('data-action');
+			// CUSTOM -- Check for add-on products
+			if (element_quantity) {
+				purchaseFormActionInput.value = 'ADPM'
+			} else {
+				purchaseFormActionInput.value = 'ADPR';
+			}
+	
+			var data = new FormData(purchaseForm);
+			var request = new XMLHttpRequest(); // Set up our HTTP request
+	
+			purchaseForm.setAttribute('data-status', 'idle');
+	
+			if (purchaseForm.getAttribute('data-status') !== 'submitting') {
+				purchaseForm.setAttribute('data-status', 'submitting');
+				purchaseButton.setAttribute('disabled', 'disabled');
+	
+				if (purchaseButton.nodeName.toLowerCase() === 'input') {
+					purchaseButton.value = 'Processing...';
+				}
+				else{
+					purchaseButton.textContent = 'Processing...';
+				}
+	
+				responseMessage.innerHTML = '';
+	
+				// Setup our listener to process completed requests
+				request.onreadystatechange = function () {
+					// Only run if the request is complete
+					if (request.readyState !== 4) {
+						return;
+					}
+	
+					// Process our return data
+					if (request.status === 200) {
+						// What do when the request is successful
+						var response = request.response;
+	
+						if (response.body.id === 'js-BASK') {
+							var basketData = response.querySelector('[data-hook="mini-basket"]');
+							var basketCount = basketData.getAttribute('data-item-count');
+							var basketSubtotal = basketData.getAttribute('data-subtotal');
+	
+							if (miniBasketCount) {
+								for (var mbcID = 0; mbcID < miniBasketCount.length; mbcID++) {
+									miniBasketCount[mbcID].textContent = basketCount; // Update mini-basket quantity (display only)
+								}
+							}
+	
+							if (miniBasketAmount) {
+								for (var mbaID = 0; mbaID < miniBasketAmount.length; mbaID++) {
+									miniBasketAmount[mbaID].textContent = basketSubtotal; // Update mini-basket subtotal (display only)
+								}
+							}
+	
+							if (typeof miniBasket !== 'undefined') {
+								document.querySelector('[data-hook="mini-basket"]').innerHTML = response.querySelector('[data-hook="mini-basket"]').innerHTML;
+	
+								setTimeout(function () {
+									document.querySelector('[data-hook="open-mini-basket"]').click();
+								}, 100);
+							}
+							else {
+								responseMessage.innerHTML = '<div class="x-messages x-messages--success"><span class="u-icon-check"></span> Added to cart.</div>';
+							}
+	
+							// Re-Initialize Attribute Machine (if it is active)
+							if (typeof attrMachCall !== 'undefined') {
+								attrMachCall.Initialize();
+							}
+						}
+						else if(response.body.id === 'js-PATR') {
+							var findRequired = purchaseForm.querySelectorAll('.is-required');
+							var missingAttributes = [];
+	
+							for (var id = 0; id < findRequired.length; id++) {
+								missingAttributes.push(' ' + findRequired[id].title);
+							}
+	
+							responseMessage.innerHTML = '<div class="x-messages x-messages--warning">All <em class="u-color-red">Required</em> options have not been selected.<br />Please review the following options: <span class="u-color-red">' + missingAttributes + '</span>.</div>';
+						}
+						else if(response.body.id === 'js-PLMT') {
+							responseMessage.innerHTML = '<div class="x-messages x-messages--warning">We do not have enough of the combination you have selected.<br />Please adjust your quantity.</div>';
+						}
+						else if(response.body.id === 'js-POUT') {
+							responseMessage.innerHTML = '<div class="x-messages x-messages--warning">The combination you have selected is out of stock.<br />Please review your options or check back later.</div>';
+						}
+						else {
+							responseMessage.innerHTML = '<div class="x-messages x-messages--warning">Please review your selection.</div>';
+						}
+	
+						// Reset button text and form status
+						purchaseButton.removeAttribute('disabled');
+	
+						if (purchaseButton.nodeName.toLowerCase() === 'input') {
+							purchaseButton.value = purchaseButtonText;
+						}
+						else{
+							purchaseButton.textContent = purchaseButtonText;
+						}
+	
+						purchaseForm.setAttribute('data-status', 'idle');
+					}
+					else {
+						// What do when the request fails
+						console.log('The request failed!');
+						purchaseForm.setAttribute('data-status', 'idle');
+					}
+				};
+	
+				/**
+				 * Create and send a request
+				 * The first argument is the post type (GET, POST, PUT, DELETE, etc.)
+				 * The second argument is the endpoint URL
+				 */
+				request.open(purchaseForm.method, purchaseForm.action, true);
+				request.responseType = 'document';
+				request.send(data);
+			}
+		} else{
+			return;
+		}
+
+	}, false);
+
+})(window, document);
+```
 
 ### Step 6 -- Error Handling
 
+At this stage, user experience is essentially the same as the default shadows theme excpet for displaying errors such as out of stock messages etc.  We can add this script in Home > User Interface >  Global Settngs > Settings > Minibasket.
 
+```xml
+<mvt:if expr="l.settings:messages:error_message_count"> 
+    <div class="x-messages x-messages--error"> 
+        <mvt:foreach iterator="error" array="messages:error_messages"> 
+	    <mvt:if expr="l.settings:error EQ 'Out Of Stock'">
+		<mvt:if expr="ISNULL l.settings:out_of_stock_check">
+			One or more of selected items is <strong>Out of Stock</strong>.
+			<mvt:assign name="l.settings:out_of_stock_check" value="1" />
+		</mvt:if>
+        <!-- 
+
+            You can add more custom error messages here
+
+            <mvt:elseif expr="some other condition">
+
+         -->
+	    <mvt:else>
+	    &mvt:error;
+	    </mvt:if> 
+        </mvt:foreach> 
+    </div> 
+</mvt:if> 
+<mvt:if expr="l.settings:messages:information_message_count"> 
+        <div class="x-messages x-messages--info"> 
+            <mvt:foreach iterator="message" array="messages:information_messages"> 
+                 &mvt:message; 
+        </mvt:foreach> 
+    </div> 
+</mvt:if>
+```
 
 ## Admin Workflow
 
