@@ -274,11 +274,213 @@ function write_quantity_inputs()
 
 ### Step 4 -- Handling Price changes
 
-At this stage, products will only update price for change in attributes, but the price of add-on products will not be added to the total displayed on the product page. We will have to modify the page template and use two scripts. One that handles price changes when triggered by attribute change and another that is triggered when an add-on product checkbox is checked. 
+At this stage, products will only update price for change in attributes, but the price of add-on products will not be added to the total displayed on the product page. We will have to modify the page template and use two scripts. One that handles price changes that is triggered by attribute change and another that is triggered when an add-on product checkbox is checked or unchecked.
+
+**PROD Template change**
+
+The default price output is in Home > User Interface > Templates > PROD > Product Display Layout and it looks something like this.
+
+```xml
+<p class="u-flex x-product-layout-purchase__pricing">
+    <mvt:if expr="l.settings:product:base_price GT l.settings:product:price">
+        <span class="x-product-layout-purchase__pricing-original">
+            <s id="price-value-additional" itemprop="price" content="&mvt:product:base_price;">&mvt:product:formatted_base_price;</s>
+        </span>     
+        <span class="x-product-layout-purchase__pricing-current">
+            <span id="price-value" data-main_price="&mvt:product:price;">&mvt:product:formatted_price;</span>
+        </span>
+    <mvt:else>
+    <span class="x-product-layout-purchase__pricing-current">
+        <span id="price-value" data-main_price="&mvt:product:price;" itemprop="price" content="&mvt:product:price;">&mvt:product:formatted_price;</span>
+    </span>
+    </mvt:if>
+</p>
+```
+The Attribute Machine outputs current price of product based on discounts and attributes to "price-value" and the base price to "price-value-additional". We will still utilize these elements in our script but use a different element to visually output pricing. So we will make the default output hidden. 
+
+```xml
+                            <p class="u-flex x-product-layout-purchase__pricing">
+                                <mvt:if expr="l.settings:product:base_price GT l.settings:product:price">
+                                    <span class="x-product-layout-purchase__pricing-original">
+                                        <s id="price-value-additional" class="u-hidden">&mvt:product:formatted_base_price;</s>
+                                        <s id="base_price_output" itemprop="price" content="&mvt:product:base_price;" >&mvt:product:formatted_base_price;</s>
+                                    </span>
+                                <span class="x-product-layout-purchase__pricing-current">
+                                    <span id="price-value" data-main_price="&mvt:product:price;" class="u-hidden">&mvt:product:formatted_price;</span>
+                                    <span id="current-price">&mvt:product:formatted_price;</span>
+                                </span>
+				<mvt:else>
+				 <span class="x-product-layout-purchase__pricing-current">
+                                    <span id="price-value" data-main_price="&mvt:product:price;" class="u-hidden">&mvt:product:formatted_price;</span>
+                                    <span id="current-price"  itemprop="price" content="&mvt:product:price;">&mvt:product:formatted_price;</span>
+                                </span>
+                                </mvt:if>
+                            </p>
+```
+
+**Price Change due to Add-on Products**
+This can be added as a javascript resource. This only triggers when a add-on product is checked or unchecked
+
+```js
+/**
+ * This script takes care of the price updates due to the add-on products only.
+ * Price updates due attribute changes are handled by
+ * User Interface > Templates > Pages > PROD (Product Display) > Product Display Layout Image Machine > Head Template
+ * 
+ */
+
+$(document).ready(function () {
+
+    // Get the output div
+    let priceOutput = $('#current-price');
+
+
+    // Function to update the total price
+    function updateTotalPrice() {
+
+        // Check if there a base price displayed.
+        if ($('#base_price_output')) {
+
+            let baseTotal = 0;
+
+            // Add the price of checked add-on checkboxes to base total
+            $('.c-form-checkbox--add-on:checked').each(function () {
+                baseTotal += parseFloat($(this).data('add_on_price'));
+            });
+
+            // Get Base Price
+            let baseCurrencyPrice = $('#price-value-additional').text();
+            // Convert Price string to Number
+            let baseNumberprice = Number(baseCurrencyPrice.replace(/[^0-9.-]+/g,""));
+            
+
+            baseTotal += baseNumberprice;
+
+            // Format the total price with USD currency and two decimal places
+            let formattedBaseTotal = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(baseTotal);
+
+            $('#base_price_output').text(formattedBaseTotal);
+
+            }
+
+        // start off with zero
+        let total = 0; 
+
+        // Add the price of checked add-on checkboxes to total
+        $('.c-form-checkbox--add-on:checked').each(function () {
+            total += parseFloat($(this).data('add_on_price'));
+        });
+
+        // Get price main product price
+        let mainProductCurrencyPrice = $('#price-value').text();
+        
+        // convert main product price from currency string format to number
+        let mainProductNumberPrice = Number(mainProductCurrencyPrice.replace(/[^0-9.-]+/g,""));
+
+        // add main product price to total
+        total += mainProductNumberPrice;
+
+        // Format the total price with USD currency and two decimal places
+        let formattedTotal = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(total);
+
+        // Update the price display
+        priceOutput.text(formattedTotal);
+    }
+
+    // Add event listener add-on products
+    $('.c-form-checkbox--add-on').change(function () {
+        updateTotalPrice();
+    })
+
+});
+```
+
+**Price Change Due to Attribute Change**
+
+This uses MivaEvents.SubscribeToEvent to listen for price change. This must be placed in Home > User Interface > Templates > PROD > Attribute Machine > Head Template or Home > User Interface > Templates > PROD > Product Display Layout Image Machine > Head Template. 
+
+```js
+MivaEvents.SubscribeToEvent('price_changed', function (product_data) { 
+        // Get the output div
+        let priceOutput = $('#current-price');
+    
+
+        // Function to update the total price
+        function attrUpdateTotalPrice() {
+
+            //Check for base price
+            if (product_data.additional_price) {
+
+            let basePriceOutput = $('#base_price_output');
+            let baseprice = product_data.additional_price;
+
+            let baseTotal = 0;
+
+                // Add the price of checked add-on checkboxes to total
+            $('.c-form-checkbox--add-on:checked').each(function () {
+                baseTotal += parseFloat($(this).data('add_on_price'));
+            });
+
+            baseTotal += baseprice;
+
+            // Reformat price to USD
+            let formattedBaseTotal = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(baseTotal);
+
+            // Update base price
+            basePriceOutput.text(formattedBaseTotal);
+
+            }
+    
+            let total = 0; 
+    
+            // Add the price of checked add-on checkboxes to total
+            $('.c-form-checkbox--add-on:checked').each(function () {
+                total += parseFloat($(this).data('add_on_price'));
+            });
+    
+            // Get price main product price
+            let mainProductPrice = product_data.price;
+    
+            // add main product price to total
+            total += mainProductPrice;
+    
+            // Reformat total to USD
+            let formattedTotal = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(total);
+    
+            // Update the price display
+            priceOutput.text(formattedTotal);
+        }
+    
+    
+        // Add initial price update
+        attrUpdateTotalPrice();
+
+}); 
+```
 
 ### Step 5 -- AJAX request
 
-In some miva themes, adding items to cart opens a minibasket that displays everything that has been added so far. This is done via an AJAX request in a script named "add-to-cart.js". Like before with the Attribute Machine, the default "add-to-cart-ajax.js" will only work with form associated with the action ADPR. We have to modify it in order to be able to handle the form associated with the action ADPM. If you don't already have this script you can create one and use theme.js to call it. Here is the modified script.  
+In some miva themes, adding items to cart opens a minibasket that displays everything that has been added so far. This is done via an AJAX request in a script named "add-to-cart.js". Like before with the Attribute Machine, the default "add-to-cart-ajax.js" will only work with the form associated with the action ADPR. We have to modify it in order to also be able to handle the form associated with the action ADPM. If you don't already have this script you can create one and use theme.js to call it. Here is the modified script.  
 
 ```js
 /**
