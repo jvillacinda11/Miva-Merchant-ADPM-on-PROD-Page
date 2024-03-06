@@ -702,6 +702,5 @@ Go to your main product and click "more" and select "Add-ons (Parent)"
 
 ![](./Assets/add-on-product-5.png)
 
+Simply paste the product code in and that's it! The add-on product will now appear with your main product. If you want to multiple add-on products then seperate each code with a comma.
 ![](./Assets/add-on-product-6.png)
-
-Simply paste 
