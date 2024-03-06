@@ -14,7 +14,7 @@
 
 ## Description
 
-This is a walk through on how to implement add-on products onto main product pages (PROD Page) in Miva Merchant eccomerce stores that use shadows readytheme. This works in tandem with the attribute machine and retains an "out-of-box" feel of shadows readytheme. This is an project is pretty involved and should only be done by a developer. 
+This is a walk through on how to implement add-on products onto main product pages (PROD Page) in Miva Merchant eccomerce stores that use shadows readytheme. This works in tandem with the attribute machine and retains an "out-of-box" feel of shadows readytheme. This is an project is very involved and should only be done by a developer. 
 
 [Live Example](https://www.weistec.com/m157_ecu_tune.html). 
 **NOTE:** This version may have additional functionality and styling that is not covered here. 
@@ -24,7 +24,7 @@ This is a walk through on how to implement add-on products onto main product pag
 
 - **Create An Easier, More Efficient And Enjoyable User Experience.** 
 
-    The main goal of this project is to allow customers to add recommended or related products to their basket alongside a main product all in a single form submit. This makes the user shopping experience quicker, more efficient and more enjoyable. More items added to cart lead to increase sales average.
+    The main goal of this project is to allow customers to add recommended or related products to their basket alongside a main product all in a single form submit. This makes the user shopping experience quicker, more efficient and more enjoyable. More items added to cart can lead to increase sales average.
 
 - **More Accurate Inventory Tracking And Discount/Tax Calculation**
 
@@ -36,7 +36,7 @@ This is a walk through on how to implement add-on products onto main product pag
 
 - **Retain Attribute Machine Functionality**
 
-    ADPM does not work with the attribute machine at the time of writing. This project works around this limitation to keep the same user experience as before.
+    ADPM does not work with the attribute machine at the time of writing. This project works around this limitation to keep the same user experience as the default.
 
 ## Limitations
 - **Discounts on add-on products don't display on product page**
@@ -59,7 +59,7 @@ You can create a new custom field group in Home > Utility Settings > Custom Fiel
 
 ![](./Assets/Customfield-Group-Add-Group-Button.png)
 
-This is the set up
+This is the set up.
 
 ![](./Assets/CustomField-Group-Set-up.png)
 
@@ -67,26 +67,26 @@ You can create a new custom field in Home > Utility Settings > Custom Fields.
 
 - **add_on_product**
     
-    This field is for main products and is part of the "Add-on (Parents)" custom field group. This custom field will hold a string of product codes of products that you would like to be add-on products. Each product code should be separated by a comma. The following is the set up.
+    This field is for main products and is part of the "Add-on (Parent)" custom field group. This custom field will hold a string of product codes of the products that you would like to be add-ons. Each product code should be separated by a comma. The following is the set up.
 
     ![](./Assets/add_on_product-set-up.png)
 
 - **add_on_product_image**
 
-    This custom field is to be used on the add-on product itself and is part of the "Add-ons (Child). This field holds an image of the add-on product. In this project, the add-on image is 480 x 480 pixels and has a lower resolution for optimal performance. The size can  The following is  the set up.
+    This custom field is to be used on the add-on product itself and is part of the "Add-ons (Child). This field holds an image of the add-on product. In this project, the add-on image is 480 x 480 pixels and has a lower resolution for optimal performance. The following is  the set up.
 
     ![](./Assets/add_on_product_image-set-up.png)
 
 - **add_on_product_short_name**
 
-    This custom field is to be used on the add-on product itself. This is to customize how you want the add-on product name to appear. It is completely optioonal, but useful if your add-on product has a long name that would take up too much space on the screen.
+    This custom field is to be used on the add-on product itself and is part of the "Add-ons (Child). This is to customize how you want the add-on product name to appear. It is completely optioonal, but useful if your add-on product has a long name that would take up too much space on the screen.
 
     ![](./Assets/add_on_product_short_name-set-up.png)
 
 
 ### Step 2 -- Add-on Product template
 
-This template is based on a [MIVA code sample](https://docs.miva.com/code-samples/product-multi-add-as-attributes). We are not going to use the javascript from this resource. We will handle quantities in step 3. This template should be put under product attributes in the PROD page template.
+This template is based on a [MIVA code sample](https://docs.miva.com/code-samples/product-multi-add-as-attributes). We are not going to use the javascript from this code sample. We will handle quantities in step 3. This template should be put under product attributes in the PROD page template.
 
 ```xml
 <div class="product-add-ons">
@@ -108,7 +108,7 @@ This template is based on a [MIVA code sample](https://docs.miva.com/code-sample
             <mvt:comment> <!-- Get add-on image and shortened names --></mvt:comment>
             <mvt:item name="customfields" param="Read_Product_Code(l.settings:add_on_code, 'add_on_product_image' ,l.settings:add_on_image)" />
             <mvt:item name="customfields" param="Read_Product_Code(l.settings:add_on_code, 'add_on_product_short_name', l.settings:add_on:short_name)" />
-            <mvt:comment> <!--Formats prices--> </mvt:comment>
+            <mvt:comment> <!--Formats price--> </mvt:comment>
 			<mvt:do name="l.settings:add_on:product:formatted_price" file="g.Module_Root $ g.Store:currncy_mod:module" value="CurrencyModule_AddFormatting( g.Store:currncy_mod, l.settings:add_on:product:price )" />
 
 			
@@ -172,7 +172,7 @@ Miva Merchant uses hidden inputs named actions that let their engine know how to
 <input type="hidden" name="Product_Attributes[1]:value"             value="small">
 ```
 
-**ADPM**
+**ADPM Structure**
 ```html
 <!-- Not Compatible with Attribute Machine -->
 <input type="hidden" name="Old_Screen" value="PROD">
@@ -205,7 +205,7 @@ Miva Merchant uses hidden inputs named actions that let their engine know how to
 
 By default the PROD page (Product Display page) uses a form that uses the action ADPR (Add Product) to add products to cart. The Attribute Machine recognizes the form format and all the expected functionality runs normally, but if we want to be able to add multiple products we will have to use the action ADPM (Add Product Multiple) and its form which the attribute machine doesn't recognize. The solution here is to load in the form in ADPR format and convert it ADPM format when the user submits the form by clicking the add to cart button. This script is a modified version of the javascript that handles quantities from the MIVA code sample from before.  [rguisewite](https://www.miva.com/forums/forum/online-merchants/miva-merchant-9/692445-error-unable-to-locate-form-for-inventory-attributes-when-setting-up-multiadd?p=692534#post692534) made the original modified script that made this possible. I slightly changed it to fit our needs but it is the same script.
 
-**NOTE:** For this script to work you must you must give your add-to-cart form the id "AddToCartForm" and the Quantity input the id "Quantity"
+**NOTE:** For this script to work you must you must give your add-to-cart form the id "AddToCartForm" and the Quantity input the id "Quantity". 
 
 ```html
 <form id="AddToCartForm" name="add" method="post" action="&mvte:urls:BASK:auto;">
@@ -299,36 +299,29 @@ The default price output is in Home > User Interface > Templates > PROD > Produc
 The Attribute Machine outputs current price of product based on discounts and attributes to "price-value" and the base price to "price-value-additional". We will still utilize these elements in our script but use a different element to visually output pricing. So we will make the default output hidden. 
 
 ```xml
-                            <p class="u-flex x-product-layout-purchase__pricing">
-                                <mvt:if expr="l.settings:product:base_price GT l.settings:product:price">
-                                    <span class="x-product-layout-purchase__pricing-original">
-                                        <s id="price-value-additional" class="u-hidden">&mvt:product:formatted_base_price;</s>
-                                        <s id="base_price_output" itemprop="price" content="&mvt:product:base_price;" >&mvt:product:formatted_base_price;</s>
-                                    </span>
-                                <span class="x-product-layout-purchase__pricing-current">
-                                    <span id="price-value" data-main_price="&mvt:product:price;" class="u-hidden">&mvt:product:formatted_price;</span>
-                                    <span id="current-price">&mvt:product:formatted_price;</span>
-                                </span>
-				<mvt:else>
-				 <span class="x-product-layout-purchase__pricing-current">
-                                    <span id="price-value" data-main_price="&mvt:product:price;" class="u-hidden">&mvt:product:formatted_price;</span>
-                                    <span id="current-price"  itemprop="price" content="&mvt:product:price;">&mvt:product:formatted_price;</span>
-                                </span>
-                                </mvt:if>
-                            </p>
+<p class="u-flex x-product-layout-purchase__pricing">
+    <mvt:if expr="l.settings:product:base_price GT l.settings:product:price">
+        <span class="x-product-layout-purchase__pricing-original">
+            <s id="price-value-additional" class="u-hidden">&mvt:product:formatted_base_price;</s>
+            <s id="base_price_output" itemprop="price" content="&mvt:product:base_price;" >&mvt:product:formatted_base_price;</s>
+        </span>
+    <span class="x-product-layout-purchase__pricing-current">
+        <span id="price-value" class="u-hidden">&mvt:product:formatted_price;</span>
+        <span id="current-price">&mvt:product:formatted_price;</span>
+    </span>
+    <mvt:else>
+        <span class="x-product-layout-purchase__pricing-current">
+            <span id="price-value" class="u-hidden">&mvt:product:formatted_price;</span>
+            <span id="current-price"  itemprop="price" content="&mvt:product:price;">&mvt:product:formatted_price;</span>
+        </span>
+    </mvt:if>
+</p>
 ```
 
 **Price Change due to Add-on Products**
-This can be added as a javascript resource. This only triggers when a add-on product is checked or unchecked
+This can be added as a javascript resource. This only triggers when a add-on product is checked or unchecked.
 
 ```js
-/**
- * This script takes care of the price updates due to the add-on products only.
- * Price updates due attribute changes are handled by
- * User Interface > Templates > Pages > PROD (Product Display) > Product Display Layout Image Machine > Head Template
- * 
- */
-
 $(document).ready(function () {
 
     // Get the output div
@@ -407,7 +400,7 @@ $(document).ready(function () {
 
 **Price Change Due to Attribute Change**
 
-This uses MivaEvents.SubscribeToEvent to listen for price change. This must be placed in Home > User Interface > Templates > PROD > Attribute Machine > Head Template or Home > User Interface > Templates > PROD > Product Display Layout Image Machine > Head Template. 
+This uses MivaEvents.SubscribeToEvent to listen for price change due to attributes. This must be placed in Home > User Interface > Templates > PROD > Attribute Machine > Head Template or Home > User Interface > Templates > PROD > Product Display Layout Image Machine > Head Template. 
 
 ```js
 MivaEvents.SubscribeToEvent('price_changed', function (product_data) { 
@@ -681,5 +674,34 @@ At this stage, user experience is essentially the same as the default shadows th
 
 ### Setting up an Add-on Product
 
+Go to the product that you would like to be an add-on product and click "more" and select "Add-ons (Child)".
+
+![](./Assets/add-on-product-1.png)
+
+![](./Assets/add-on-product-2.png)
+
+(Optional) If you want an image to appear next to your add-on product checkbox click upload.
+
+![](./Assets/add-on-product-3.png)
+
+(Optional) If you want a shortened name to appear instead of the full product name. enter it here.
+
+![](./Assets/add-on-product-4.png)
+
+Click update when all changes are made.
+
+Click Product Tab. Copy the Product Code. in This example Product code is test-add-on
+
+![](./Assets/add-on-code.png)
 
 ### Setting up the Main Product
+
+Go to your main product and click "more" and select "Add-ons (Parent)"
+
+![](./Assets/add-on-product-1.png)
+
+![](./Assets/add-on-product-5.png)
+
+![](./Assets/add-on-product-6.png)
+
+Simply paste 
