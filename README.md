@@ -22,7 +22,7 @@ This is a walk through on how to implement add-on products onto main product pag
 
 ### Demo
 
-![](./Assets/Demo.mp4)
+[![](./Assets/Demo.mp4)](./Assets/Demo.mp4)
 
 [Live Example](https://www.weistec.com/m157_ecu_tune.html). 
 **NOTE:** This version may have additional functionality and styling that is not covered here. 
